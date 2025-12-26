@@ -70,7 +70,7 @@
             padding: 0 5px;
         }
 
-        input {
+        input, select {
             width: 100%;
             padding: 12px;
             border: 1px solid var(--border);
@@ -80,9 +80,10 @@
             background: #fff;
             color: #333;
             font-weight: 500;
+            height: 45px; /* Chiều cao cố định để input và select bằng nhau */
         }
 
-        input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37,99,235,0.1); }
+        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37,99,235,0.1); }
         input::placeholder { color: #cbd5e1; font-weight: 400; }
 
         /* --- BHXH SECTION (COMPACT) --- */
@@ -111,6 +112,7 @@
         .bhxh-col input {
             font-size: 13px;
             padding: 10px;
+            height: 40px;
         }
 
         /* --- ROW 2 COLUMNS --- */
@@ -251,19 +253,28 @@
         </div>
     </div>
 
-    <div class="input-group">
-        <label>Tổng ngày công (A6)</label>
-        <input type="tel" id="ngayCong" placeholder="VD: 26" style="margin-top: 5px;">
+    <div class="row">
+        <div class="input-group">
+            <label>Tổng ngày công (A6)</label>
+            <input type="tel" id="ngayCong" placeholder="VD: 26">
+        </div>
+        <div class="input-group">
+            <label>Giờ chuẩn/ngày</label>
+            <select id="gioChuanNgay">
+                <option value="8" selected>8 giờ</option>
+                <option value="12">12 giờ</option>
+            </select>
+        </div>
     </div>
 
     <div class="row">
         <div class="input-group">
             <label>TC Thường <span class="sub-label orange">x1.5</span></label>
-            <input type="tel" id="gioTCThuong" placeholder="0" style="margin-top: 5px;">
+            <input type="tel" id="gioTCThuong" placeholder="0">
         </div>
         <div class="input-group">
             <label>TC Lễ/Tết <span class="sub-label red">x3</span></label>
-            <input type="tel" id="gioTCLe" placeholder="0" style="margin-top: 5px;">
+            <input type="tel" id="gioTCLe" placeholder="0">
         </div>
     </div>
 
@@ -336,7 +347,6 @@
 
     function getNumber(id) {
         let val = document.getElementById(id).value;
-        // Xử lý cả dấu chấm phân cách ngàn để lấy số chuẩn
         return parseFloat(val.replace(/\./g, "").replace(/,/g, "")) || 0;
     }
 
@@ -373,6 +383,9 @@
         const luongTong = getNumber('luongTong');
         const luongBH = getNumber('luongBH');
         const ngayCong = getNumber('ngayCong');
+        // Lấy giờ làm việc tiêu chuẩn (8 hoặc 12)
+        const gioChuanNgay = parseFloat(document.getElementById('gioChuanNgay').value);
+        
         const gioTCThuong = getNumber('gioTCThuong');
         const gioTCLe = getNumber('gioTCLe');
 
@@ -381,8 +394,10 @@
             return;
         }
 
-        // Logic tính toán
-        const tongGioCong = ngayCong * 8; 
+        // --- Logic tính toán ---
+        // A8: Tổng giờ công tháng = Ngày công * Giờ chuẩn (8 hoặc 12)
+        const tongGioCong = ngayCong * gioChuanNgay; 
+        
         const donGiaGioThuc = luongTong / tongGioCong; 
         const donGiaGioBH = luongBH / tongGioCong;
 
@@ -396,18 +411,16 @@
         const totalSalary = luongTong + tienTCThuong + tienTCLe;
 
         // --- CẬP NHẬT KẾT QUẢ VÀO POPUP ---
-        
-        // 1. Cập nhật số tiền
         document.getElementById('resLuongCung').innerText = formatMoney(luongTong);
         document.getElementById('resTCThuong').innerText = formatMoney(tienTCThuong);
         document.getElementById('resTCLe').innerText = formatMoney(tienTCLe);
         document.getElementById('resTongNhan').innerText = formatMoney(totalSalary);
         
-        // 2. Cập nhật TIÊU ĐỀ DYNAMIC (Theo số giờ nhập vào)
+        // Update tiêu đề dynamic
         document.getElementById('lblTCThuong').innerText = `Tổng tiền TC (${gioTCThuong}h)`;
         document.getElementById('lblTCLe').innerText = `Tổng tiền Lễ/Tết (${gioTCLe}h)`;
 
-        // 3. Cập nhật Đơn giá nhỏ
+        // Update đơn giá nhỏ
         document.getElementById('resDonGiaThuong').innerText = Math.round(gia1GioTCThuong).toLocaleString('vi-VN');
         document.getElementById('resDonGiaLe').innerText = Math.round(gia1GioTCLe).toLocaleString('vi-VN');
 
