@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tính Lương Nhanh</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563EB;
+            --bg: #F1F5F9;
+            --card-bg: #FFFFFF;
+            --text-main: #1E293B;
+            --text-sec: #64748B;
+            --border: #E2E8F0;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 18px;
+            text-align: center;
+            margin: 0 0 15px 0;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- INPUT STYLES --- */
+        .input-group { margin-bottom: 12px; }
+        
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .info-btn {
+            color: var(--primary);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0 5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            background: #fff;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37,99,235,0.1); }
+        input::placeholder { color: #cbd5e1; font-weight: 400; }
+
+        /* --- BHXH SECTION (COMPACT) --- */
+        .bhxh-container {
+            background: #EFF6FF;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px dashed #BFDBFE;
+            margin-bottom: 12px;
+        }
+        
+        .bhxh-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .bhxh-col { flex: 1; }
+        
+        .bhxh-label {
+            font-size: 11px;
+            color: var(--text-sec);
+            margin-bottom: 4px;
+            display: block;
+        }
+        
+        .bhxh-col input {
+            font-size: 13px;
+            padding: 10px;
+        }
+
+        /* --- ROW 2 COLUMNS --- */
+        .row { display: flex; gap: 10px; }
+        .row .input-group { flex: 1; }
+
+        .sub-label {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 5px;
+        }
+        .orange { background: #FEF3C7; color: #D97706; }
+        .red { background: #FEE2E2; color: #DC2626; }
+
+        /* --- BUTTON --- */
+        .btn-calc {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+        }
+        .btn-calc:active { transform: translateY(1px); }
+
+        /* --- MODAL CHUNG --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            backdrop-filter: blur(3px);
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 340px;
+            border-radius: 16px;
+            padding: 0;
+            overflow: hidden;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            animation: popIn 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+
+        /* --- RESULT BILL STYLE --- */
+        .bill-header {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+        .bill-header h2 { margin: 0; font-size: 18px; }
+        
+        .bill-body { padding: 20px; }
+
+        .bill-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: #475569;
+            border-bottom: 1px dashed #e2e8f0;
+            padding-bottom: 4px;
+        }
+        .bill-row:last-child { border-bottom: none; }
+        .bill-row strong { color: #0F172A; }
+
+        .bill-total {
+            background: #F0FDF4;
+            padding: 15px;
+            text-align: center;
+            border-top: 1px solid #DCFCE7;
+        }
+        .bill-total span { display: block; font-size: 12px; color: #166534; text-transform: uppercase; }
+        .bill-total div { font-size: 26px; font-weight: 700; color: #15803D; margin-top: 5px; }
+
+        .btn-close {
+            width: 100%;
+            padding: 12px;
+            background: white;
+            border: none;
+            border-top: 1px solid #eee;
+            color: #64748B;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* INFO POPUP TEXT */
+        .info-text-content {
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #334155;
+        }
+
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Bảng Tính Lương</h1>
+
+    <div class="input-group">
+        <div class="label-row">
+            <label>Lương Tổng (A2)</label>
+            <span class="info-btn" onclick="showInfo('salary')">ⓘ</span>
+        </div>
+        <input type="tel" id="luongTong" placeholder="Nhập lương tổng..." onkeyup="formatInput(this)">
+    </div>
+
+    <div class="bhxh-container">
+        <div class="label-row" style="margin-bottom: 8px;">
+            <label style="font-size: 12px; color: #1e40af;">Mức đóng / Trừ BHXH (A4)</label>
+            <span class="info-btn" style="font-size: 14px;" onclick="showInfo('bhxh')">ⓘ</span>
+        </div>
+        <div class="bhxh-row">
+            <div class="bhxh-col">
+                <span class="bhxh-label">Mức lương đóng</span>
+                <input type="tel" id="luongBH" onkeyup="formatInput(this)" oninput="syncBHXH('base')">
+            </div>
+            <div class="bhxh-col">
+                <span class="bhxh-label">Tiền trừ (10.5%)</span>
+                <input type="tel" id="tienTruBH" onkeyup="formatInput(this)" oninput="syncBHXH('deduct')">
+            </div>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label>Tổng ngày công (A6)</label>
+        <input type="tel" id="ngayCong" placeholder="VD: 26" style="margin-top: 5px;">
+    </div>
+
+    <div class="row">
+        <div class="input-group">
+            <label>TC Thường <span class="sub-label orange">x1.5</span></label>
+            <input type="tel" id="gioTCThuong" placeholder="0" style="margin-top: 5px;">
+        </div>
+        <div class="input-group">
+            <label>TC Lễ/Tết <span class="sub-label red">x3</span></label>
+            <input type="tel" id="gioTCLe" placeholder="0" style="margin-top: 5px;">
+        </div>
+    </div>
+
+    <button class="btn-calc" onclick="calculateSalary()">TÍNH LƯƠNG</button>
+</div>
+
+<div id="resultModal" class="modal-overlay" onclick="closeModal('resultModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="bill-header">
+            <h2>CHI TIẾT LƯƠNG</h2>
+        </div>
+        <div class="bill-body">
+            <div class="bill-row">
+                <span>Lương deal</span>
+                <strong id="resLuongCung">0</strong>
+            </div>
+            <div class="bill-row">
+                <span id="lblTCThuong">Tổng tiền TC (0h)</span>
+                <strong id="resTCThuong">0</strong>
+            </div>
+            <div class="bill-row">
+                <span id="lblTCLe">Tổng tiền Lễ/Tết (0h)</span>
+                <strong id="resTCLe">0</strong>
+            </div>
+            
+            <div class="bill-row" style="margin-top: 10px; font-size: 12px; color: #94a3b8; border:none;">
+                <span>Đơn giá 1h tăng ca:</span>
+                <span id="resDonGiaThuong">0</span>
+            </div>
+            <div class="bill-row" style="font-size: 12px; color: #94a3b8; border:none;">
+                <span>Đơn giá 1h Lễ/Tết:</span>
+                <span id="resDonGiaLe">0</span>
+            </div>
+        </div>
+        <div class="bill-total">
+            <span>Tổng Thực Nhận</span>
+            <div id="resTongNhan">0 đ</div>
+        </div>
+        <button class="btn-close" onclick="closeModal('resultModal')">Đóng lại</button>
+    </div>
+</div>
+
+<div id="infoModal" class="modal-overlay" onclick="closeModal('infoModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="bill-header" style="background: #64748B;">
+            <h2 id="infoTitle">Giải thích</h2>
+        </div>
+        <div class="info-text-content" id="infoText">
+            Nội dung giải thích...
+        </div>
+        <button class="btn-close" onclick="closeModal('infoModal')">Đã hiểu</button>
+    </div>
+</div>
+
+<script>
+    // --- 1. KHỞI TẠO MẶC ĐỊNH ---
+    window.addEventListener('DOMContentLoaded', (event) => {
+        // Set mặc định BHXH
+        document.getElementById('luongBH').value = "5.208.000";
+        // Tự động tính tiền trừ BHXH ngay lập tức
+        syncBHXH('base');
+    });
+
+    // --- 2. CÁC HÀM XỬ LÝ SỐ ---
+    function formatInput(elm) {
+        let value = elm.value.replace(/\D/g, "");
+        if (value === "") return;
+        elm.value = parseInt(value).toLocaleString("vi-VN");
+    }
+
+    function getNumber(id) {
+        let val = document.getElementById(id).value;
+        // Xử lý cả dấu chấm phân cách ngàn để lấy số chuẩn
+        return parseFloat(val.replace(/\./g, "").replace(/,/g, "")) || 0;
+    }
+
+    function formatMoney(num) {
+        return Math.round(num).toLocaleString('vi-VN') + ' đ';
+    }
+
+    // --- 3. LOGIC BHXH 2 CHIỀU ---
+    function syncBHXH(source) {
+        const inputBase = document.getElementById('luongBH');
+        const inputDeduct = document.getElementById('tienTruBH');
+        
+        if (source === 'base') {
+            let val = getNumber('luongBH');
+            if (val > 0) {
+                let deduct = val * 0.105; 
+                inputDeduct.value = Math.round(deduct).toLocaleString("vi-VN");
+            } else {
+                inputDeduct.value = "";
+            }
+        } else {
+            let val = getNumber('tienTruBH');
+            if (val > 0) {
+                let base = val / 0.105;
+                inputBase.value = Math.round(base).toLocaleString("vi-VN");
+            } else {
+                inputBase.value = "";
+            }
+        }
+    }
+
+    // --- 4. TÍNH TOÁN & HIỆN POPUP ---
+    function calculateSalary() {
+        const luongTong = getNumber('luongTong');
+        const luongBH = getNumber('luongBH');
+        const ngayCong = getNumber('ngayCong');
+        const gioTCThuong = getNumber('gioTCThuong');
+        const gioTCLe = getNumber('gioTCLe');
+
+        if (luongTong === 0 || ngayCong === 0) {
+            alert("Vui lòng nhập Lương Tổng và Ngày Công!");
+            return;
+        }
+
+        // Logic tính toán
+        const tongGioCong = ngayCong * 8; 
+        const donGiaGioThuc = luongTong / tongGioCong; 
+        const donGiaGioBH = luongBH / tongGioCong;
+
+        // Công thức
+        const gia1GioTCThuong = donGiaGioThuc + (donGiaGioBH * 0.5);
+        const gia1GioTCLe = donGiaGioThuc + (donGiaGioBH * 2);
+
+        const tienTCThuong = gia1GioTCThuong * gioTCThuong;
+        const tienTCLe = gia1GioTCLe * gioTCLe;
+        
+        const totalSalary = luongTong + tienTCThuong + tienTCLe;
+
+        // --- CẬP NHẬT KẾT QUẢ VÀO POPUP ---
+        
+        // 1. Cập nhật số tiền
+        document.getElementById('resLuongCung').innerText = formatMoney(luongTong);
+        document.getElementById('resTCThuong').innerText = formatMoney(tienTCThuong);
+        document.getElementById('resTCLe').innerText = formatMoney(tienTCLe);
+        document.getElementById('resTongNhan').innerText = formatMoney(totalSalary);
+        
+        // 2. Cập nhật TIÊU ĐỀ DYNAMIC (Theo số giờ nhập vào)
+        document.getElementById('lblTCThuong').innerText = `Tổng tiền TC (${gioTCThuong}h)`;
+        document.getElementById('lblTCLe').innerText = `Tổng tiền Lễ/Tết (${gioTCLe}h)`;
+
+        // 3. Cập nhật Đơn giá nhỏ
+        document.getElementById('resDonGiaThuong').innerText = Math.round(gia1GioTCThuong).toLocaleString('vi-VN');
+        document.getElementById('resDonGiaLe').innerText = Math.round(gia1GioTCLe).toLocaleString('vi-VN');
+
+        // Mở Modal
+        document.getElementById('resultModal').style.display = 'flex';
+    }
+
+    // --- 5. QUẢN LÝ POPUP ---
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+    function showInfo(type) {
+        const modal = document.getElementById('infoModal');
+        const title = document.getElementById('infoTitle');
+        const text = document.getElementById('infoText');
+
+        if (type === 'salary') {
+            title.innerText = "Lương Tổng (A2)";
+            text.innerText = "Là tổng thu nhập thỏa thuận (Gross/Net) chưa trừ các khoản bảo hiểm, thuế, v.v.";
+        } else if (type === 'bhxh') {
+            title.innerText = "Mức đóng BHXH (A4)";
+            text.innerText = "Bạn chỉ cần nhập 1 ô (Lương đóng hoặc Tiền trừ), ô kia sẽ tự nhảy. Mặc định là 5.208.000đ.";
+        }
+        modal.style.display = 'flex';
+    }
+</script>
+
+</body>
+</html>
